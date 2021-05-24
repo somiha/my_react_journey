@@ -1,62 +1,48 @@
 import React, { Component } from 'react';
 import BookList from './lists/BookList.js';
 import bookList from '../assets/books.js';
+import NewBook from './representational/NewBook.js';
+import { Route, NavLink, Switch, Redirect } from 'react-router-dom';
+import BookDetail from './representational/BookDetail';
 
 class MainComponent extends Component{
-    state = {
-        books : bookList,
-        showBooks: true
-      }
+  constructor(props) {
+    super(props);
+    this.state = {
+      books : bookList,
+      selectedBook: null
+    }
+  }
+  selectedBookHandler = bookID => {
+    const book = this.state.books.filter(book =>
+      book.id===bookID)[0];
+    this.setState({
+      selectedBook: book
+    })
+  }
     
-      changeWithInputState = (event, index) => {
-        const book ={
-          ...this.state.books[index]
-        }
-        book.bookName = event.target.value;
-        const books = [...this.state.books];
-        books[index] = book;
-        this.setState({ books: books});
-    
-      }
-    
-      deleteBookState = index => {
-       // const books = this.state.books.slice();
-       //const books = this.state.books.map( item=> item)
-       const books = [...this.state.books]; 
-       books.splice(index, 1);
-        this.setState({
-          books: books
-        });
-      };
-      toggleBooks = () => {
-        this.setState({ showBooks: !this.state.showBooks });
-      };
-    
-      render() {
-        const style ={
-          border: "1px solid red",
-          borderRadius: "5px",
-          backgroundColor: "Black",
-          color: "white"
-        };
-        
-        let books = null;
-        if(this.state.showBooks){
-          books = <BookList 
+
+      render() {        
+          const books = <BookList 
           books={this.state.books} 
-          deleteBookState={this.deleteBookState} 
-          changeWithInputState={this.changeWithInputState}
+          selectedBookHandler={this.selectedBookHandler}
            />
-        }
-        
-        console.log(books);
+      
       
         return (
               <div className="App">
-                <h1 style={style}>Book List</h1>
-                <button onClick={this.toggleBooks}>Toggle Books</button>
-                {books}
-    
+                <nav className="nav-bar">
+                  <ul>
+                    <li><NavLink to="/" exact>Home</NavLink></li>
+                    <li><NavLink to="/new-book">New Book</NavLink></li>
+                  </ul>
+                </nav>
+                <Switch>
+                  <Route path="/books" exact render={()=>books} />
+                  <Route path="/new-book" exact component={NewBook} />
+                  <Route path="/:id" render={()=> <BookDetail book={this.state.selectedBook} />}/>
+                  <Redirect from="/" to="/books" />
+                </Switch>
               </div>
             );
       }
